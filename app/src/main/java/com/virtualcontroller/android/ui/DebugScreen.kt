@@ -205,15 +205,23 @@ fun DebugScreen(onBack: () -> Unit) {
 private data class InputPadInfo(val id: Int, val name: String, val vendorId: Int, val productId: Int)
 
 private fun listInputGamepads(): List<InputPadInfo> {
-    val pads: List<InputPadInfo> = InputDevice.getDeviceIds().mapNotNull { id: Int ->
-        val device: InputDevice = InputDevice.getDevice(id) ?: return@mapNotNull null
-        if (device.isVirtual) return@mapNotNull null
-        val gamepad = device.sources and InputDevice.SOURCE_GAMEPAD == InputDevice.SOURCE_GAMEPAD
-        val joystick = device.sources and InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK
-        if (!gamepad && !joystick) return@mapNotNull null
-        InputPadInfo(id, device.name, device.vendorId, device.productId)
+    val pads = buildList {
+        for (id in InputDevice.getDeviceIds()) {
+            val device = InputDevice.getDevice(id) ?: continue
+            if (device.isVirtual) continue
+
+            val gamepad = device.sources and InputDevice.SOURCE_GAMEPAD ==
+                    InputDevice.SOURCE_GAMEPAD
+            val joystick = device.sources and InputDevice.SOURCE_JOYSTICK ==
+                    InputDevice.SOURCE_JOYSTICK
+
+            if (gamepad || joystick) {
+                add(InputPadInfo(id, device.name, device.vendorId, device.productId))
+            }
+        }
     }
-    return pads.distinctBy { pad: InputPadInfo -> pad.name }
+
+    return pads.distinctBy { it.name }
 }
 
 /** Temporary raw-event probe; the physical pad is released as soon as capture stops. */
