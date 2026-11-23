@@ -211,7 +211,7 @@ private fun listInputGamepads(): List<InputPadInfo> = InputDevice.getDeviceIds()
     val joystick = device.sources and InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK
     if (!gamepad && !joystick) return@mapNotNull null
     InputPadInfo(id, device.name, device.vendorId, device.productId)
-}.distinctBy { it.name }
+}.distinctBy { pad -> pad.name }
 
 /** Temporary raw-event probe; the physical pad is released as soon as capture stops. */
 private class RawEvdevCapture(context: Context) {
